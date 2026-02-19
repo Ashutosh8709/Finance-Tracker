@@ -8,6 +8,7 @@ import AnalyticsPage from "./pages/AnalyticsPage";
 import Sidebar from "./components/Sidebar";
 import TransactionModal from "./components/TransactionModal";
 import "./index.css";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 const PlusIcon = () => (
   <svg
@@ -29,7 +30,6 @@ function AppInner() {
   const txData = useTransactions();
   const { addTransaction, updateTransaction, deleteTransaction } = txData;
 
-  const [currentPage, setCurrentPage] = useState("dashboard");
   const [modalOpen, setModalOpen] = useState(false);
   const [editData, setEditData] = useState(null);
 
@@ -39,16 +39,19 @@ function AppInner() {
         <div className="spinner" />
       </div>
     );
+
   if (!user) return <AuthPage />;
 
   const handleEdit = (t) => {
     setEditData(t);
     setModalOpen(true);
   };
+
   const handleAdd = () => {
     setEditData(null);
     setModalOpen(true);
   };
+
   const handleSubmit = async (data) => {
     if (editData) {
       await updateTransaction(editData.id, { ...data, updatedAt: new Date() });
@@ -57,28 +60,39 @@ function AppInner() {
     }
   };
 
-  const pages = {
-    dashboard: (
-      <Dashboard
-        data={txData}
-        onEdit={handleEdit}
-        onDelete={deleteTransaction}
-      />
-    ),
-    transactions: (
-      <TransactionsPage
-        data={txData}
-        onEdit={handleEdit}
-        onDelete={deleteTransaction}
-      />
-    ),
-    analytics: <AnalyticsPage data={txData} />,
-  };
-
   return (
     <div className="app-layout">
-      <Sidebar currentPage={currentPage} setCurrentPage={setCurrentPage} />
-      <main className="main-content">{pages[currentPage]}</main>
+      <Sidebar />
+
+      <main className="main-content">
+        <Routes>
+          <Route path="/" element={<Navigate to="/dashboard" />} />
+
+          <Route
+            path="/dashboard"
+            element={
+              <Dashboard
+                data={txData}
+                onEdit={handleEdit}
+                onDelete={deleteTransaction}
+              />
+            }
+          />
+
+          <Route
+            path="/transactions"
+            element={
+              <TransactionsPage
+                data={txData}
+                onEdit={handleEdit}
+                onDelete={deleteTransaction}
+              />
+            }
+          />
+
+          <Route path="/analytics" element={<AnalyticsPage data={txData} />} />
+        </Routes>
+      </main>
 
       <button className="fab" onClick={handleAdd} title="Add Transaction">
         <PlusIcon />
@@ -99,8 +113,10 @@ function AppInner() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <AppInner />
-    </AuthProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <AppInner />
+      </AuthProvider>
+    </BrowserRouter>
   );
 }

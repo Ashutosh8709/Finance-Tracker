@@ -1,5 +1,6 @@
 import React from "react";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const LayoutGrid = () => (
   <svg
@@ -16,6 +17,7 @@ const LayoutGrid = () => (
     <rect x="14" y="14" width="7" height="7" />
   </svg>
 );
+
 const ArrowUpDown = () => (
   <svg
     viewBox="0 0 24 24"
@@ -31,6 +33,7 @@ const ArrowUpDown = () => (
     <path d="M7 4v16" />
   </svg>
 );
+
 const PieChart = () => (
   <svg
     viewBox="0 0 24 24"
@@ -44,6 +47,7 @@ const PieChart = () => (
     <path d="M22 12A10 10 0 0 0 12 2v10z" />
   </svg>
 );
+
 const LogOut = () => (
   <svg
     viewBox="0 0 24 24"
@@ -61,8 +65,12 @@ const LogOut = () => (
   </svg>
 );
 
-export default function Sidebar({ currentPage, setCurrentPage }) {
+export default function Sidebar() {
   const { user, logout } = useAuth();
+
+  const navigate = useNavigate();
+  const location = useLocation(); // current URL
+
   const initials = user?.displayName
     ? user.displayName
         .split(" ")
@@ -91,8 +99,10 @@ export default function Sidebar({ currentPage, setCurrentPage }) {
         {navItems.map((item) => (
           <button
             key={item.id}
-            className={`nav-item ${currentPage === item.id ? "active" : ""}`}
-            onClick={() => setCurrentPage(item.id)}
+            className={`nav-item ${
+              location.pathname === `/${item.id}` ? "active" : ""
+            }`}
+            onClick={() => navigate(`/${item.id}`)}
           >
             {item.icon}
             <span>{item.label}</span>
